@@ -11,7 +11,7 @@ import {Label} from "@/components/ui/label";
 
 export default function FindHomes() {
   const router = useRouter();
-  const gameEngine = useGameEngine();
+  const {engine: gameEngine} = useGameEngine();
 
   const [homeDescription, setHomeDescription] = useState("");
   const [loading, setLoading] = useState(false);
@@ -123,7 +123,11 @@ export default function FindHomes() {
                     </div>
                     <div className="text-right">
                       <p className="font-semibold">
-                        €{Number(Math.round(r.yearlyRentInEuro ?? 0) / 12).toLocaleString("de-DE")} per month
+                        €
+                        {Number(
+                          Math.round(r.yearlyRentInEuro ?? 0) / 12
+                        ).toLocaleString("de-DE")}{" "}
+                        per month
                       </p>
                     </div>
                   </div>
