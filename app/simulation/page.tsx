@@ -48,14 +48,14 @@ export default function Simulation() {
 
   const currentYear = state?.year || new Date().getFullYear();
 
-  const handleAdvanceYear = () => {
+  const handleAdvanceYear = async () => {
     gameEngine.decideActions({
       newOccupationModel: null,
       newPortfolioModel: null,
       newLivingModel: null,
       newSavingsRateInPercent: savingsRate,
     });
-    console.log(gameEngine.runLoop());
+    console.log(await gameEngine.runLoop());
     triggerUpdate();
     const updatedEvent = (
       gameEngine as unknown as {currentEventResult?: EventModel}
