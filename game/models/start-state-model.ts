@@ -9,4 +9,5 @@ export interface StartStateModel {
   living: LivingModel;
   savingsRateInPercent: number;
   amountOfChildren: number;
+  married: boolean;
 }
