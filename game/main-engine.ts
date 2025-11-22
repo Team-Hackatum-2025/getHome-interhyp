@@ -11,6 +11,7 @@ import { OccupationModel } from "./models/occupation-model";
 import { LivingModel } from "./models/living-model";
 import { UserInputModel } from "./models/user-input-model";
 import { PortfolioModel } from "./models/portfolio-model";
+import { CreditEngine } from "./engines/credit-engine";
 
 export class GameEngine implements GameEngineInterface {
     private eventEngine: EventEngine;
@@ -18,6 +19,7 @@ export class GameEngine implements GameEngineInterface {
     private satisfactionEngine: SatisfactionEngine;
     private investmentEngine: InvestmentEngine;
     private homeEngine: HomeEngine;
+    private creditEngine: CreditEngine;
 
     private state: StateModel;
     private goals: GoalModel;
@@ -31,13 +33,15 @@ export class GameEngine implements GameEngineInterface {
         jobEngine?: JobEngine,
         satisfactionEngine?: SatisfactionEngine,
         investmentEngine?: InvestmentEngine,
-        homeEngine?: HomeEngine
+        homeEngine?: HomeEngine,
+        creditEngine?: CreditEngine
     ) {
         this.eventEngine = eventEngine ?? new EventEngine();
         this.jobEngine = jobEngine ?? new JobEngine();
         this.satisfactionEngine = satisfactionEngine ?? new SatisfactionEngine();
         this.investmentEngine = investmentEngine ?? new InvestmentEngine();
         this.homeEngine = homeEngine ?? new HomeEngine();
+        this.creditEngine = creditEngine ?? new CreditEngine();
 
         this.state = {} as StateModel;
         this.goals = {} as GoalModel;
@@ -75,7 +79,8 @@ export class GameEngine implements GameEngineInterface {
             year: new Date().getFullYear(),
             educationLevel: "",
             lifeSatisfactionFrom1To100: 50,
-            terminated: false
+            terminated: false,
+            creditWorthiness: false
         };
 
         this.isRunning = true;
@@ -85,11 +90,25 @@ export class GameEngine implements GameEngineInterface {
 
         this.goals = goal;
 
+        this.state = this.creditEngine.checkAndApplyCredit(this.state, this.goals);
+
         return this.state;
     }
     async runLoop(): Promise<EventModel | undefined> {
-        // MAYBE ADJUST RETURN type to add a terminated flag for game terminated.
-        // HERE CHECK IF THE GAME CAN END
+        // Apply automatic updates
+        this.state.portfolio = this.investmentEngine.handleReturnOnInvestment(this.state);
+        this.state.lifeSatisfactionFrom1To100 = this.satisfactionEngine.handleSatisfaction(this.state);
+
+        this.state = this.creditEngine.checkAndApplyCredit(this.state, this.goals);
+
+        // Increment year and age
+        this.state.year += 1;
+        this.state.age += 1;
+
+        // Check if goal is reached
+        this.checkGoalReached();
+
+        this.history.push(JSON.parse(JSON.stringify(this.state)));
 
         const random_event = await this.eventEngine.randomlyGenerateEvent(
             0.5,
@@ -117,8 +136,10 @@ export class GameEngine implements GameEngineInterface {
             educationLevel: "",
             lifeSatisfactionFrom1To100: 0,
             married: false,
-            terminated: false
+            terminated: false,
+            creditWorthiness: false
         };
+        
         this.goals = {} as GoalModel;
         this.history = [];
         this.eventHistory = [];
@@ -202,18 +223,20 @@ export class GameEngine implements GameEngineInterface {
             this.state.savingsRateInPercent = userInput.newSavingsRateInPercent;
         }
 
-        // Apply automatic updates
-        this.state.portfolio = this.investmentEngine.handleReturnOnInvestment(this.state);
-        this.state.lifeSatisfactionFrom1To100 = this.satisfactionEngine.handleSatisfaction(this.state);
+        // // Apply automatic updates
+        // this.state.portfolio = this.investmentEngine.handleReturnOnInvestment(this.state);
+        // this.state.lifeSatisfactionFrom1To100 = this.satisfactionEngine.handleSatisfaction(this.state);
 
-        // Increment year and age
-        this.state.year += 1;
-        this.state.age += 1;
+        this.state = this.creditEngine.checkAndApplyCredit(this.state, this.goals);
 
-        // Check if goal is reached
-        this.checkGoalReached();
+        // // Increment year and age
+        // this.state.year += 1;
+        // this.state.age += 1;
 
-        this.history.push(JSON.parse(JSON.stringify(this.state)));
+        // // Check if goal is reached
+        // this.checkGoalReached();
+
+        // this.history.push(JSON.parse(JSON.stringify(this.state)));
 
 
         return this.state;
