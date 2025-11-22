@@ -96,7 +96,7 @@ export class GameEngine implements GameEngineInterface {
             this.currentEventResult = random_event;
         }
         
-        return {} as EventModel;
+        return random_event;
     }
     reset(): void {
         this.isRunning = false;

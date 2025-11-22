@@ -29,7 +29,7 @@ import {EventModel} from "@/game/models/event-model";
 import {StateModel} from "@/game/models/state-model";
 
 export default function Simulation() {
-  const gameEngine = useGameEngine();
+  const {engine: gameEngine, triggerUpdate} = useGameEngine();
   const state = gameEngine.getState() as StateModel;
   const history = gameEngine.getHistory() as StateModel[];
   const eventHistory = gameEngine.getEventHistory() as EventModel[];
@@ -40,13 +40,23 @@ export default function Simulation() {
   const [savingsRate, setSavingsRate] = useState(
     state?.savingsRateInPercent || 0
   );
-  const [showEventDecision, setShowEventDecision] = useState(currentEvent);
+  const [showEventDecision, setShowEventDecision] = useState(!!currentEvent);
 
   const currentYear = state?.year || new Date().getFullYear();
 
   const handleAdvanceYear = () => {
-    gameEngine.runLoop();
-    setShowEventDecision(currentEvent);
+    gameEngine.decideActions({
+      newOccupationModel: null,
+      newPortfolioModel: null,
+      newLivingModel: null,
+      newSavingsRateInPercent: savingsRate
+    });
+    console.log(gameEngine.runLoop());
+    triggerUpdate();
+    const updatedEvent = (
+      gameEngine as unknown as {currentEventResult?: EventModel}
+    ).currentEventResult;
+    setShowEventDecision(!!updatedEvent);
   };
 
   const handleSavingsRateChange = (value: number[]) => {
@@ -55,7 +65,8 @@ export default function Simulation() {
 
   const handleEventDecision = (chooseOption1: boolean) => {
     gameEngine.decideEvent(!chooseOption1);
-    setShowEventDecision(undefined);
+    triggerUpdate();
+    setShowEventDecision(false);
   };
 
   // Chart data from real game history
