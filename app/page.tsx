@@ -16,6 +16,10 @@ import {
 import {Check, ChevronDown} from "lucide-react";
 import {cn} from "@/lib/utils";
 import {useRouter} from "next/navigation";
+import {StartStateModel} from "@/game/models/start-state-model";
+import {GoalModel} from "@/game/models/goal-model";
+import {Checkbox} from "@/components/ui/checkbox";
+import {Label} from "@/components/ui/label";
 
 export default function Home() {
   const router = useRouter();
@@ -24,32 +28,46 @@ export default function Home() {
   const [step, setStep] = useState<number>(1);
 
   const cityOptions = [
-    {city: "Berlin", region: "BE"},
-    {city: "Hamburg", region: "HH"},
-    {city: "Munich", region: "BY"},
-    {city: "Cologne", region: "NW"},
-    {city: "Frankfurt", region: "HE"},
+    {city: "Berlin", zip: "10115"},
+    {city: "Hamburg", zip: "20095"},
+    {city: "München", zip: "80331"},
+    {city: "Köln", zip: "50667"},
+    {city: "Frankfurt", zip: "60311"},
   ];
 
-  const dreamTypes = [
+  const estateTypes = [
     {value: "HOUSEBUY", label: "House"},
     {value: "APPARTMENTBUY", label: "Apartment"},
-    {value: "LANDBUY", label: "Land"},
   ];
 
-  const [formData, setFormData] = useState({
+  const [startState, setStartState] = useState<StartStateModel>({
     age: 30,
-    jobTitle: "Software Engineer",
-    salary: 50000,
-    children: 0,
-    capital: 10000,
-    accomodation: "Flat in Munich",
-    rent: 1200,
-    savingsRate: 20,
-    dreamLocation: "Munich",
-    dreamRegion: "BY",
-    dreamType: "HOUSEBUY",
+    occupation: {
+      occupationDescription: "",
+      occupationTitle: "Software Engineer",
+      stressLevelFrom0To100: 50,
+      yearlySalaryInEuro: 60000,
+    },
+    amountOfChildren: 0,
+    portfolio: {cashInEuro: 10000, cryptoInEuro: 0, etfInEuro: 0},
+    living: {
+      zip: "80538",
+      yearlyRentInEuro: 12000,
+      sizeInSquareMeter: 12,
+    },
+    savingsRateInPercent: 20,
+    married: false,
   });
+
+  const [goal, setGoal] = useState<GoalModel>({
+    buyingPrice: 400000,
+    rooms: 3,
+    squareMeter: 40,
+    zip: "80802",
+    numberWishedChildren: 0,
+    estateType: "HOUSEBUY",
+  });
+
   const totalSteps = steps.length;
   const progress = (step / totalSteps) * 100;
 
@@ -98,14 +116,14 @@ export default function Home() {
           {step === 1 && (
             <div className="space-y-4">
               <div>
-                <p className="font-medium mb-1">Age: {formData.age} years</p>
+                <p className="font-medium mb-1">Age: {startState.age} years</p>
                 <Slider
-                  value={[formData.age]}
+                  value={[startState.age]}
                   min={18}
                   max={100}
                   step={1}
                   onValueChange={(val) =>
-                    setFormData({...formData, age: val[0]})
+                    setStartState({...startState, age: val[0]})
                   }
                 />
               </div>
@@ -113,25 +131,90 @@ export default function Home() {
               <Input
                 name="jobTitle"
                 placeholder="Job Title"
-                value={formData.jobTitle}
+                value={startState.occupation.occupationTitle}
                 onChange={(e) =>
-                  setFormData({...formData, jobTitle: e.target.value})
+                  setStartState({
+                    ...startState,
+                    occupation: {
+                      ...startState.occupation,
+                      occupationTitle: e.target.value,
+                    },
+                  })
                 }
               />
 
               <div>
                 <p className="font-medium mb-1">
-                  Yearly Salary: €{formData.salary.toLocaleString()}
+                  Yearly Salary: €
+                  {startState.occupation.yearlySalaryInEuro.toLocaleString()}
                 </p>
                 <Slider
-                  value={[formData.salary]}
-                  min={20000}
-                  max={200000}
+                  value={[startState.occupation.yearlySalaryInEuro]}
+                  min={10000}
+                  max={500000}
                   step={1000}
                   onValueChange={(val) =>
-                    setFormData({...formData, salary: val[0]})
+                    setStartState({
+                      ...startState,
+                      occupation: {
+                        ...startState.occupation,
+                        yearlySalaryInEuro: val[0],
+                      },
+                    })
                   }
                 />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="married"
+                  checked={startState.married}
+                  onCheckedChange={(checked) =>
+                    setStartState({...startState, married: Boolean(checked)})
+                  }
+                />
+                <Label htmlFor="married" className="font-medium">
+                  Are you married?
+                </Label>
+              </div>
+
+              <div>
+                <p className="font-medium mb-1">
+                  How many children do you have?
+                </p>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    className="h-8 w-8 p-0"
+                    onClick={() =>
+                      setStartState({
+                        ...startState,
+                        amountOfChildren: startState.amountOfChildren! - 1,
+                      })
+                    }
+                    disabled={startState.amountOfChildren! <= 0}
+                  >
+                    -
+                  </Button>
+
+                  <span className="w-8 text-center text-lg">
+                    {startState.amountOfChildren!}
+                  </span>
+
+                  <Button
+                    variant="outline"
+                    className="h-8 w-8 p-0"
+                    onClick={() =>
+                      setStartState({
+                        ...startState,
+                        amountOfChildren: startState.amountOfChildren! + 1,
+                      })
+                    }
+                  >
+                    +
+                  </Button>
+                </div>
               </div>
 
               <div>
@@ -144,27 +227,27 @@ export default function Home() {
                     variant="outline"
                     className="h-8 w-8 p-0"
                     onClick={() =>
-                      setFormData({
-                        ...formData,
-                        children: formData.children - 1,
+                      setGoal({
+                        ...goal,
+                        numberWishedChildren: goal.numberWishedChildren! - 1,
                       })
                     }
-                    disabled={formData.children <= 0}
+                    disabled={goal.numberWishedChildren! <= 0}
                   >
                     -
                   </Button>
 
                   <span className="w-8 text-center text-lg">
-                    {formData.children}
+                    {goal.numberWishedChildren!}
                   </span>
 
                   <Button
                     variant="outline"
                     className="h-8 w-8 p-0"
                     onClick={() =>
-                      setFormData({
-                        ...formData,
-                        children: formData.children + 1,
+                      setGoal({
+                        ...goal,
+                        numberWishedChildren: goal.numberWishedChildren! + 1,
                       })
                     }
                   >
@@ -180,54 +263,55 @@ export default function Home() {
             <div className="space-y-4">
               <div>
                 <p className="font-medium mb-1">
-                  Starting Capital: €{formData.capital.toLocaleString()}
+                  Starting Capital: €
+                  {startState.portfolio.cashInEuro.toLocaleString()}
                 </p>
                 <Slider
-                  value={[formData.capital]}
+                  value={[startState.portfolio.cashInEuro]}
                   min={0}
                   max={500000}
                   step={1000}
                   onValueChange={(val) =>
-                    setFormData({...formData, capital: val[0]})
+                    setStartState({
+                      ...startState,
+                      portfolio: {...startState.portfolio, cashInEuro: val[0]},
+                    })
                   }
                 />
               </div>
 
-              <Input
-                name="accomodation"
-                placeholder="Current Accommodation"
-                value={formData.accomodation}
-                onChange={(e) =>
-                  setFormData({...formData, accomodation: e.target.value})
-                }
-              />
-
               <div>
                 <p className="font-medium mb-1">
-                  Monthly Rent: €{formData.rent.toLocaleString()}
+                  Monthly Rent: €
+                  {new Intl.NumberFormat("de-DE").format(
+                    Math.round(startState.living.yearlyRentInEuro / 12)
+                  )}
                 </p>
                 <Slider
-                  value={[formData.rent]}
-                  min={300}
-                  max={5000}
-                  step={50}
+                  value={[startState.living.yearlyRentInEuro]}
+                  min={1200}
+                  max={120000}
+                  step={120}
                   onValueChange={(val) =>
-                    setFormData({...formData, rent: val[0]})
+                    setStartState({
+                      ...startState,
+                      living: {...startState.living, yearlyRentInEuro: val[0]},
+                    })
                   }
                 />
               </div>
 
               <div>
                 <p className="font-medium mb-1">
-                  Savings Rate: {formData.savingsRate}%
+                  Savings Rate: {startState.savingsRateInPercent}%
                 </p>
                 <Slider
-                  value={[formData.savingsRate]}
+                  value={[startState.savingsRateInPercent]}
                   min={0}
                   max={80}
                   step={1}
                   onValueChange={(val) =>
-                    setFormData({...formData, savingsRate: val[0]})
+                    setStartState({...startState, savingsRateInPercent: val[0]})
                   }
                 />
               </div>
@@ -247,7 +331,8 @@ export default function Home() {
                       role="combobox"
                       className="w-full justify-between"
                     >
-                      {formData.dreamLocation || "Select city"}
+                      {cityOptions.find((city) => city.zip === goal.zip)
+                        ?.city || "Select city"}
                       <ChevronDown className="h-4 w-4 opacity-50" />
                     </Button>
                   </PopoverTrigger>
@@ -256,27 +341,24 @@ export default function Home() {
                       <CommandInput placeholder="Search city..." />
                       <CommandEmpty>No city found.</CommandEmpty>
                       <CommandGroup>
-                        {cityOptions.map(({city, region}) => (
+                        {cityOptions.map(({zip}) => (
                           <CommandItem
-                            key={city}
-                            value={city}
+                            key={zip}
+                            value={zip}
                             onSelect={() =>
-                              setFormData({
-                                ...formData,
-                                dreamLocation: city,
-                                dreamRegion: region,
+                              setGoal({
+                                ...goal,
+                                zip,
                               })
                             }
                           >
                             <Check
                               className={cn(
                                 "mr-2 h-4 w-4",
-                                formData.dreamLocation === city
-                                  ? "opacity-100"
-                                  : "opacity-0"
+                                goal.zip === zip ? "opacity-100" : "opacity-0"
                               )}
                             />
-                            {city}
+                            {cityOptions.find((city) => city.zip == zip)?.city}
                           </CommandItem>
                         ))}
                       </CommandGroup>
@@ -296,8 +378,9 @@ export default function Home() {
                       className="w-full justify-between"
                     >
                       {
-                        dreamTypes.find((t) => t.value === formData.dreamType)
-                          ?.label
+                        estateTypes.find(
+                          (estate) => estate.value === goal.estateType
+                        )?.label
                       }
                       <ChevronDown className="h-4 w-4 opacity-50" />
                     </Button>
@@ -307,27 +390,23 @@ export default function Home() {
                       <CommandInput placeholder="Search type..." />
                       <CommandEmpty>No type found.</CommandEmpty>
                       <CommandGroup>
-                        {dreamTypes.map((type) => (
+                        {estateTypes.map((estate) => (
                           <CommandItem
-                            key={type.value}
-                            value={type.value}
+                            key={estate.value}
+                            value={estate.value}
                             onSelect={() =>
-                              setFormData({
-                                ...formData,
-                                dreamType:
-                                  type.value as typeof formData.dreamType,
-                              })
+                              setGoal({...goal, estateType: estate.value})
                             }
                           >
                             <Check
                               className={cn(
                                 "mr-2 h-4 w-4",
-                                formData.dreamType === type.value
+                                goal.estateType === estate.value
                                   ? "opacity-100"
                                   : "opacity-0"
                               )}
                             />
-                            {type.label}
+                            {estate.label}
                           </CommandItem>
                         ))}
                       </CommandGroup>
@@ -336,9 +415,26 @@ export default function Home() {
                 </Popover>
               </div>
 
+              <div>
+                <p className="font-medium mb-1">
+                  Square Meters: {goal.squareMeter} m²
+                </p>
+                <Slider
+                  value={[goal.squareMeter]}
+                  min={0}
+                  max={800}
+                  step={5}
+                  onValueChange={(val) =>
+                    setGoal({
+                      ...goal,
+                      squareMeter: val[0],
+                    })
+                  }
+                />
+              </div>
+
               <p className="text-sm text-muted-foreground">
-                This step will query the ThinkImmo API to find the best matching
-                real-estate listings.
+                Results of the Listings
               </p>
             </div>
           )}
@@ -359,6 +455,7 @@ export default function Home() {
               <Button
                 onClick={() => {
                   /* define here to start game startGame(formData) */
+
                   router.push("/simulation");
                 }}
               >

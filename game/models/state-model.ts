@@ -4,5 +4,4 @@ export interface StateModel extends StartStateModel {
   year: number;
   educationLevel: string;
   lifeSatisfactionFrom1To100: number;
-  married: boolean;
 }
