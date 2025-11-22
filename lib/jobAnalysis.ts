@@ -4,6 +4,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 export interface JobMetrics {
   estimatedSalary: number;
   stressLevel: number;
+  explanation: string;
 }
 
 export async function calculateJobMetrics(jobTitle: string): Promise<JobMetrics> {
@@ -22,9 +23,15 @@ export async function calculateJobMetrics(jobTitle: string): Promise<JobMetrics>
     model: "gemini-2.0-flash",
     systemInstruction: `
       You are an HR expert for the German market. 
-      Estimate the annual salary in EUR (estimatedSalary) and stress level (stressLevel 1-100). 
-      IMPORTANT: Return only integer numbers. No decimals, no currency symbols, no units (e.g. return 50000, not 50000 EUR).
-      Respond ONLY with a JSON object. No Markdown formatting.`,
+      
+      Task:
+      1. Estimate the annual salary in EUR (estimatedSalary).
+      2. Estimate the stress level on a scale of 1-100 (stressLevel).
+      3. Provide a short "explanation" (max 1 sentence). Give a reason or an interesting fact why the stress or salary is at this level (e.g., high responsibility, shortage of skilled workers, emotional load).
+
+      Constraints:
+      - Return ONLY integer numbers for salary and stress. No decimals, no units.
+      - Respond ONLY with a JSON object. No Markdown formatting`,
     generationConfig: { responseMimeType: "application/json" } 
   });
 
@@ -40,10 +47,13 @@ export async function calculateJobMetrics(jobTitle: string): Promise<JobMetrics>
     return {
       estimatedSalary: Math.round(Number(data.estimatedSalary) || 0),
       stressLevel: Math.round(Number(data.stressLevel) || 0),
+      explanation: data.explanation || "No explanation available.",
     };
   } catch (error) {
     console.error("Error from Gemini API:", error);
     
-    return { estimatedSalary: 0, stressLevel: 0 };
+    return { estimatedSalary: 0, 
+      stressLevel: 0, 
+      explanation: "Sorry. Could not analyze job data."};
   }
 }

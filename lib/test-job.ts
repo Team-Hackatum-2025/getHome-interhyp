@@ -28,6 +28,7 @@ async function runTests() {
       const metrics = await calculateJobMetrics(title);
       console.log(` -> Salary: ${metrics.estimatedSalary} €`);
       console.log(` -> Stress: ${metrics.stressLevel}/100`);
+      console.log(` -> Note:   ${metrics.explanation}`); // New line
     } catch (e: any) {
       // HIER IST DIE ÄNDERUNG: Wir geben den echten Fehler aus!
       console.error("!!! FEHLER DETAILS !!!");
