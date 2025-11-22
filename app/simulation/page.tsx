@@ -2,12 +2,6 @@
 import {useGameEngine} from "@/components/game-engine-context";
 import {Button} from "@/components/ui/button";
 import {Card} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {Slider} from "@/components/ui/slider";
 import {Label} from "@/components/ui/label";
 import {useState, useMemo} from "react";
@@ -27,8 +21,18 @@ import {
 } from "recharts";
 import {EventModel} from "@/game/models/event-model";
 import {StateModel} from "@/game/models/state-model";
+import {useRouter} from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export default function Simulation() {
+  const router = useRouter();
   const gameEngine = useGameEngine();
   const state = gameEngine.getState() as StateModel;
   const history = gameEngine.getHistory() as StateModel[];
@@ -40,27 +44,20 @@ export default function Simulation() {
   const [savingsRate, setSavingsRate] = useState(
     state?.savingsRateInPercent || 0
   );
-  const [showEventDecision, setShowEventDecision] = useState(currentEvent);
 
   const currentYear = state?.year || new Date().getFullYear();
 
   const handleAdvanceYear = () => {
     gameEngine.runLoop();
-    setShowEventDecision(currentEvent);
   };
 
   const handleSavingsRateChange = (value: number[]) => {
     setSavingsRate(value[0]);
   };
 
-  const handleEventDecision = (chooseOption1: boolean) => {
-    gameEngine.decideEvent(!chooseOption1);
-    setShowEventDecision(undefined);
-  };
-
   // Chart data from real game history
   const chartData = useMemo(() => {
-    return history.map((s: StateModel,) => ({
+    return history.map((s: StateModel) => ({
       year: s.year,
       wealth:
         (s.portfolio?.cashInEuro ?? 0) +
@@ -139,9 +136,27 @@ export default function Simulation() {
           >
             Next Year
           </Button>
-          <Button className="w-full bg-black hover:bg-gray-800 text-white">
-            Actions
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="w-full mb-6 bg-black text-white">
+                Actions
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Actions</DialogTitle>
+                <DialogDescription>
+                  Decide which action you want to choose next
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid grid-cols-2 gap-4">
+                <Button onClick={() => router.push("/simulation/find-homes")}>Move</Button>
+                <Button onClick={() => null}>Change Occupation</Button>
+                <Button onClick={() => null}>Manage Portfolio</Button>
+                <Button onClick={() => null}>Take a Loan</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </Card>
 
@@ -229,8 +244,9 @@ export default function Simulation() {
             </LineChart>
           </ResponsiveContainer>
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-500">
+          <div className="flex flex-col items-center justify-center h-full text-gray-500">
             <p>Start the game from the init page to see your progress</p>
+            <Button onClick={() => router.push("/init")}>Go to Init</Button>
           </div>
         )}
       </Card>
@@ -317,128 +333,6 @@ export default function Simulation() {
           )}
         </div>
       </Card>
-
-      {/* Event Decision Dialog */}
-      <Dialog open={showEventDecision} onOpenChange={setShowEventDecision}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-bold">Event!</DialogTitle>
-          </DialogHeader>
-
-          {currentEvent && (
-            <div className="space-y-4">
-              <div>
-                <p className="font-semibold text-base">
-                  {currentEvent.eventDescription}
-                </p>
-                <p className="text-sm text-gray-600 mt-2">
-                  {currentEvent.eventQuestion}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                {/* Option 1 */}
-                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                  <p className="font-semibold text-xs text-blue-900 mb-2">
-                    Option 1
-                  </p>
-                  {currentEvent.impact && (
-                    <ul className="text-xs space-y-1 text-blue-800">
-                      {currentEvent.impact.changeInSavingsRateInPercent && (
-                        <li>
-                          Savings: +
-                          {currentEvent.impact.changeInSavingsRateInPercent}%
-                        </li>
-                      )}
-                      {currentEvent.impact
-                        .changeInLifeSatisfactionFrom1To100 && (
-                        <li>
-                          Satisfaction:{" "}
-                          {currentEvent.impact
-                            .changeInLifeSatisfactionFrom1To100 > 0
-                            ? "+"
-                            : ""}
-                          {
-                            currentEvent.impact
-                              .changeInLifeSatisfactionFrom1To100
-                          }
-                        </li>
-                      )}
-                      {currentEvent.impact.newPortfolioModel?.cashInEuro && (
-                        <li>
-                          Cash: +€
-                          {currentEvent.impact.newPortfolioModel.cashInEuro}
-                        </li>
-                      )}
-                    </ul>
-                  )}
-                </div>
-
-                {/* Option 2 */}
-                <div className="bg-orange-50 p-3 rounded-lg border border-orange-200">
-                  <p className="font-semibold text-xs text-orange-900 mb-2">
-                    Option 2
-                  </p>
-                  {currentEvent.alternativeImpact && (
-                    <ul className="text-xs space-y-1 text-orange-800">
-                      {currentEvent.alternativeImpact
-                        .changeInSavingsRateInPercent && (
-                        <li>
-                          Savings: +
-                          {
-                            currentEvent.alternativeImpact
-                              .changeInSavingsRateInPercent
-                          }
-                          %
-                        </li>
-                      )}
-                      {currentEvent.alternativeImpact
-                        .changeInLifeSatisfactionFrom1To100 && (
-                        <li>
-                          Satisfaction:{" "}
-                          {currentEvent.alternativeImpact
-                            .changeInLifeSatisfactionFrom1To100 > 0
-                            ? "+"
-                            : ""}
-                          {
-                            currentEvent.alternativeImpact
-                              .changeInLifeSatisfactionFrom1To100
-                          }
-                        </li>
-                      )}
-                      {currentEvent.alternativeImpact.newPortfolioModel
-                        ?.cashInEuro && (
-                        <li>
-                          Cash: +€
-                          {
-                            currentEvent.alternativeImpact.newPortfolioModel
-                              .cashInEuro
-                          }
-                        </li>
-                      )}
-                    </ul>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-                  onClick={() => handleEventDecision(true)}
-                >
-                  Choose Option 1
-                </Button>
-                <Button
-                  className="flex-1 bg-orange-600 hover:bg-orange-700 text-white"
-                  onClick={() => handleEventDecision(false)}
-                >
-                  Choose Option 2
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </main>
   );
 }
