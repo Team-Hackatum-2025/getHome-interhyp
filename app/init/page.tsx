@@ -58,6 +58,7 @@ export default function Init() {
     amountOfChildren: 0,
     portfolio: {cashInEuro: 10000, cryptoInEuro: 0, etfInEuro: 0},
     living: {
+      name: "Current Apartment",
       zip: "80538",
       yearlyRentInEuro: 12000,
       sizeInSquareMeter: 12,
