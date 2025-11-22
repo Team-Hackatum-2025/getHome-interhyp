@@ -10,10 +10,9 @@ import { LivingModel } from "./models/living-model";
 import { PortfolioModel } from "./models/portfolio-model";
 import { StateModel } from "./models/state-model";
 import { GoalModel } from "./models/goal-model";
-import { EventType } from "./engines/event-engine";
 
 // Mock Event Engine
-class MockEventEngine implements Partial<EventEngine> {
+/*class MockEventEngine implements Partial<EventEngine> {
   async randomlyGenerateEvent(
     probability: number,
     history: StateModel[],
@@ -91,7 +90,7 @@ class MockEventEngine implements Partial<EventEngine> {
       eventQuestion: "Do you accept?",
     };
   }
-}
+}*/
 
 // Mock Job Engine
 class MockJobEngine implements Partial<JobEngine> {
@@ -170,15 +169,15 @@ class MockHomeEngine implements Partial<HomeEngine> {
 }
 
 // Factory function to create a mocked GameEngine
-export function createMockedGameEngine(): GameEngine {
+/*export function createMockedGameEngine(): GameEngine {
   return new GameEngine(
     new MockEventEngine() as unknown as EventEngine,
   );
-}
+}*/
 
 // Export mock classes for testing
 export {
-  MockEventEngine,
+  //MockEventEngine,
   MockJobEngine,
   MockSatisfactionEngine,
   MockInvestmentEngine,
