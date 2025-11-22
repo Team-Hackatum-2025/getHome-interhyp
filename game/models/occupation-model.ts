@@ -1,6 +1,6 @@
 export interface OccupationModel {
-    jobTitle: string;
-    jobDescription: string;
+    occupationTitle: string;
+    occupationDescription: string;
     yearlySalaryInEuro: number;
     stressLevelFrom0To100: number;
 }
