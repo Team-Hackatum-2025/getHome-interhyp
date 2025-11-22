@@ -55,12 +55,9 @@ export default function Simulation() {
       newLivingModel: null,
       newSavingsRateInPercent: savingsRate
     });
-    console.log(gameEngine.runLoop());
+    let gameEvent = gameEngine.runLoop();
     triggerUpdate();
-    const updatedEvent = (
-      gameEngine as unknown as {currentEventResult?: EventModel}
-    ).currentEventResult;
-    setShowEventDecision(!!updatedEvent);
+    setShowEventDecision(!!gameEvent);
   };
 
   const handleSavingsRateChange = (value: number[]) => {
@@ -268,6 +265,37 @@ export default function Simulation() {
           </div>
         )}
       </Card>
+
+      {/* Event Decision Dialog */}
+      <Dialog open={showEventDecision} onOpenChange={setShowEventDecision}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Event Occurred!</DialogTitle>
+            <DialogDescription>
+              {currentEvent?.eventDescription}
+            </DialogDescription>
+          </DialogHeader>
+          {currentEvent?.eventQuestion && (
+            <div className="space-y-4">
+              <p className="text-sm font-semibold">{currentEvent.eventQuestion}</p>
+              <div className="grid grid-cols-2 gap-4">
+                <Button 
+                  onClick={() => handleEventDecision(true)}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  Yes
+                </Button>
+                <Button 
+                  onClick={() => handleEventDecision(false)}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  No
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Right Sidebar: Events & Portfolio */}
       <Card className="col-span-4 p-4 flex flex-col gap-4">
