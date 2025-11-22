@@ -43,7 +43,7 @@ export class JobEngine implements JobEngineInterface {
             const data = JSON.parse(text);
 
             return {
-                occupationTitle: job_description, // Der Titel ist der Input
+                occupationTitle: job_description, 
                 occupationDescription: data.occupationDescription || "No description available.",
                 yearlySalaryInEuro: Math.round(Number(data.yearlySalaryInEuro) || 0),
                 stressLevelFrom0To100: Math.round(Number(data.stressLevelFrom0To100) || 0)
