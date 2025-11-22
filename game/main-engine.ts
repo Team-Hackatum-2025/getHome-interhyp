@@ -86,7 +86,10 @@ export class GameEngine implements GameEngineInterface {
 
         return this.state;
     }
-    runLoop(): EventModel {
+    runLoop(): EventModel | undefined {
+        // MAYBE ADJUST RETURN type to add a terminated flag for game terminated.
+        // HERE CHECK IF THE GAME CAN END
+
         const random_event = this.eventEngine.randomlyGenerateEvent(0.5, this.history, [this.goals]);
         
         if (random_event) {
@@ -213,7 +216,7 @@ export interface GameEngineInterface {
     getEventHistory(): EventModel[];
 
     startGame(start_state: StartStateModel, goal: GoalModel): StateModel;
-    runLoop(): EventModel;
+    runLoop(): EventModel | undefined;
     reset(): void;
     decideEvent(decision: boolean): StateModel;
     decideActions(userInput: UserInputModel): StateModel;
