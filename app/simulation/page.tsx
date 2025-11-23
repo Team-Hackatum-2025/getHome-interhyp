@@ -30,6 +30,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {Home, MapPin, Users, Ruler} from "lucide-react";
 
 export default function Simulation() {
   const router = useRouter();
@@ -49,7 +50,7 @@ export default function Simulation() {
   const currentYear = state?.year || new Date().getFullYear();
 
   const handleAdvanceYear = async () => {
-    let gameEvent = await gameEngine.runLoop();
+    const gameEvent = await gameEngine.runLoop();
     triggerUpdate();
     setShowEventDecision(!!gameEvent);
   };
@@ -75,7 +76,7 @@ export default function Simulation() {
       satisfaction: s.lifeSatisfactionFrom1To100,
       goal: gameEngine.getGoals().buyingPrice,
     }));
-  }, [history.length, state.year]);
+  }, [history, gameEngine]);
 
   // Portfolio breakdown
   const portfolioBreakdown = useMemo(() => {
@@ -103,6 +104,31 @@ export default function Simulation() {
     (sum, item) => sum + item.value,
     0
   );
+
+  // Goal / city / family info
+  const goalPrice =
+    (gameEngine.getGoals && gameEngine.getGoals().buyingPrice) || 0;
+  const goalProgressPercent =
+    goalPrice > 0
+      ? Math.min(100, Math.round((totalWealth / goalPrice) * 100))
+      : 0;
+
+  const cityOptions = [
+    {city: "Berlin", zip: "10115"},
+    {city: "Hamburg", zip: "20095"},
+    {city: "München", zip: "80331"},
+    {city: "Köln", zip: "50667"},
+    {city: "Frankfurt", zip: "60311"},
+  ];
+
+  const living = state?.living;
+  const livingCity =
+    (living && cityOptions.find((c) => c.zip === String(living.zip))?.city) ||
+    (living?.zip ?? "Unknown");
+
+  const married = Boolean(state?.married);
+  const children = state?.amountOfChildren ?? 0;
+  const monthlyRent = Math.round((state?.living?.yearlyRentInEuro ?? 0) / 12);
 
   return (
     <main className="grid grid-cols-12 gap-4 p-4 h-screen bg-gray-50">
@@ -142,6 +168,73 @@ export default function Simulation() {
                 <p className="text-sm font-semibold">
                   €{Math.round(totalWealth).toLocaleString()}
                 </p>
+                <div className="mt-2">
+                  <p className="text-xs text-gray-500">Wealth vs Goal</p>
+                  <div className="w-full bg-gray-200 rounded h-3 mt-1 overflow-hidden">
+                    <div
+                      className="h-3"
+                      style={{
+                        width: `${goalProgressPercent}%`,
+                        backgroundColor: CASH_COLOR,
+                      }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-600 mt-1">
+                    <span>€{Math.round(totalWealth).toLocaleString()}</span>
+                    <span>€{Math.round(goalPrice).toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="pt-4 border-t">
+            <div className="mt-1 flex items-center gap-2">
+              <Home size={16} className="text-gray-500" />
+              <p className="text-xs text-gray-600">
+                {living?.name || "Apartment"}
+              </p>
+            </div>
+
+            <div className="mt-1 flex items-center gap-2">
+              <MapPin size={14} className="text-gray-400" />
+              <p className="text-xs text-gray-500">{livingCity}</p>
+            </div>
+
+            {typeof living?.sizeInSquareMeter === "number" && (
+              <div className="mt-1 flex items-center gap-2">
+                <Ruler size={14} className="text-gray-400" />
+                <p className="text-xs text-gray-600">
+                  {living.sizeInSquareMeter} m²
+                </p>
+              </div>
+            )}
+
+            {state?.living?.yearlyRentInEuro !== undefined && (
+              <div className="mt-2">
+                <p className="text-xs text-gray-600">Monthly Costs</p>
+                <p className="text-sm font-semibold">
+                  €{monthlyRent.toLocaleString("de-DE")} per month
+                </p>
+              </div>
+            )}
+
+            <div className="mt-3 flex items-center gap-3">
+              <div className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                <Users size={14} className="text-gray-600" />
+                <span>
+                  {children} {children === 1 ? "child" : "children"}
+                </span>
+              </div>
+
+              <div
+                className={
+                  "px-2 py-1 rounded text-xs font-medium " +
+                  (married
+                    ? "bg-green-100 text-green-800"
+                    : "bg-gray-100 text-gray-700")
+                }
+              >
+                {married ? "Married" : "Single"}
               </div>
             </div>
           </div>

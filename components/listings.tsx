@@ -91,6 +91,9 @@ export function Listings({
                 </div>
               </div>
 
+                <div className="p-4 font-light">
+                    {listing.title}
+                </div>
               {/* Content */}
               <div className="p-4 space-y-3">
                 {/* Location */}
