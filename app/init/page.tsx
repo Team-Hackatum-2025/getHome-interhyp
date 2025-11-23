@@ -361,7 +361,7 @@ export default function Init() {
                 <Slider
                   value={[startState.portfolio.cashInEuro]}
                   min={0}
-                  max={500000}
+                  max={133700}
                   step={1000}
                   onValueChange={(val) =>
                     setStartState({
@@ -382,7 +382,7 @@ export default function Init() {
                 <Slider
                   value={[startState.living.yearlyRentInEuro]}
                   min={1200}
-                  max={120000}
+                  max={48000}
                   step={120}
                   onValueChange={(val) =>
                     setStartState({
