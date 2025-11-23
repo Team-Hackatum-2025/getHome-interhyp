@@ -170,6 +170,13 @@ export default function Simulation() {
     setShowEventDecision(false);
   };
 
+  const handleDialogChange = (open: boolean) => {
+    if (currentEvent?.eventQuestion) {
+      setShowEventDecision(open);
+    }
+    // ignore close attempts for non-interactive events until acknowledged
+  };
+
   // Chart data from real game history
   const chartData = useMemo(() => {
     return history.map((s: StateModel) => ({
@@ -509,8 +516,8 @@ export default function Simulation() {
       </Card>
 
       {/* Event Decision Dialog */}
-      <Dialog open={showEventDecision} onOpenChange={setShowEventDecision}>
-        <DialogContent>
+      <Dialog open={showEventDecision} onOpenChange={handleDialogChange}>
+        <DialogContent showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>Event Occurred!</DialogTitle>
           <DialogDescription>
@@ -527,8 +534,11 @@ export default function Simulation() {
             />
           </div>
         ) : (
-          <div className="mt-3">
+          <div className="mt-3 space-y-3">
             <ImpactCard title="Impact" impact={currentEvent?.impact} />
+            <Button className="w-full" onClick={() => handleEventDecision(true)}>
+              Acknowledge
+            </Button>
           </div>
         )}
         {currentEvent?.eventQuestion && (
