@@ -13,7 +13,7 @@ export default function FindHomes() {
   const router = useRouter();
   const {engine: gameEngine} = useGameEngine();
 
-  const [homeDescription, setHomeDescription] = useState("");
+  const [homeDescription, setHomeDescription] = useState("1 room studio in Munich");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<LivingModel[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);

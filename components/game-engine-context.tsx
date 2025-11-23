@@ -1,6 +1,7 @@
 "use client";
 import {createContext, useContext, useState} from "react";
 import {GameEngine} from "@/game/main-engine";
+import { MockGameEngine } from "@/game/engines/presentation/mock-main-engine";
 
 type GameEngineContextType = {
   engine: GameEngine;
@@ -12,7 +13,7 @@ const GameEngineContext = createContext<GameEngineContextType | undefined>(
 );
 
 export function GameEngineProvider({children}: {children: React.ReactNode}) {
-  const [engine] = useState(() => new GameEngine());
+  const [engine] = useState(() => new MockGameEngine());
   const [, setUpdateCounter] = useState(0);
 
   const triggerUpdate = () => {

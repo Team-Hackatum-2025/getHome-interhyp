@@ -49,31 +49,31 @@ export default function Init() {
   ];
 
   const [startState, setStartState] = useState<StartStateModel>({
-    age: 30,
+    age: 25,
     occupation: {
       occupationDescription: "",
-      occupationTitle: "Software Engineer",
-      stressLevelFrom0To100: 50,
+      occupationTitle: "Junior Software Engineer",
+      stressLevelFrom0To100: 30,
       yearlySalaryInEuro: 60000,
     },
     amountOfChildren: 0,
     portfolio: {cashInEuro: 10000, cryptoInEuro: 0, etfInEuro: 0},
     living: {
-      name: "Current Apartment",
+      name: "Student Dormitory Room",
       zip: "80538",
-      yearlyRentInEuro: 12000,
+      yearlyRentInEuro: 800*12,
       sizeInSquareMeter: 12,
     },
-    savingsRateInPercent: 20,
+    savingsRateInPercent: 25,
     married: false,
   });
 
   const [goal, setGoal] = useState<GoalModel>({
-    buyingPrice: 400000,
+    buyingPrice: 800000,
     rooms: 3,
-    squareMeter: 105,
+    squareMeter: 75,
     zip: "80331",
-    numberWishedChildren: 0,
+    numberWishedChildren: 2,
     estateType: "HOUSEBUY",
   });
 

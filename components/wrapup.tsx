@@ -229,7 +229,7 @@ export default function Wrapup() {
       <div className="h-screen w-screen bg-linear-to-br from-purple-600 via-pink-500 to-orange-400 flex items-center justify-center">
         <div className="text-center text-white">
           <div className="text-4xl font-bold mb-4">
-            Generating Your Wrapped...
+            Congrats, you made it! Generating your wrapped...
           </div>
           <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-white mx-auto"></div>
         </div>
@@ -310,7 +310,7 @@ export default function Wrapup() {
             <div className="text-center text-white space-y-8">
               <div className="text-9xl font-bold animate-pulse">🏠</div>
               <h1 className="text-6xl md:text-7xl font-bold">
-                Your getHome Wrapped
+                Congrats, you made it!🎉
               </h1>
               <p className="text-2xl md:text-3xl">
                 Let&apos;s look at your journey...
@@ -661,13 +661,6 @@ export default function Wrapup() {
                     }
                   }}
                 >
-                  <Button
-                    size="lg"
-                    className="text-xl px-16 py-8 rounded-full bg-white text-black hover:bg-linear-to-r hover:from-orange-400 hover:via-red-400 hover:to-yellow-400 hover:text-white transition-all duration-300 flex items-center gap-4 shadow-2xl hover:shadow-orange-500/60"
-                    onClick={() => router.push("/init")}
-                  >
-                    Begin Simulation <ArrowRight className="w-6 h-6" />
-                  </Button>
                 </motion.div>
               </div>
             </div>
