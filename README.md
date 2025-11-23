@@ -17,7 +17,7 @@ The simulation accurately models key dynamics:
 * AI: Google Gemini API (Event Generation, Financial Analysis)
 * Infrastructure: Docker / Google Cloud Run
 
-## 3. Technical Documentation (Math Background)
+## 3. Technical Documentation
 
 For a detailed overview of the governing equations for Life Satisfaction (Tanh Curve), Stochastic Asset Growth (Box-Muller/Normal Distribution), and Household Budgeting:
 
