@@ -242,19 +242,21 @@ export default function Wrapup() {
   // Define different background gradients for variety
   const getBackgroundGradient = (slideType: string, index: number) => {
     const gradients = [
-      "bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400",
-      "bg-gradient-to-br from-blue-600 via-purple-500 to-pink-500",
-      "bg-gradient-to-br from-indigo-600 via-blue-500 to-cyan-400",
-      "bg-gradient-to-br from-pink-600 via-rose-500 to-orange-400",
-      "bg-gradient-to-br from-emerald-600 via-teal-500 to-blue-500",
-      "bg-gradient-to-br from-violet-600 via-purple-500 to-fuchsia-500",
-      "bg-gradient-to-br from-orange-600 via-red-500 to-pink-500",
-      "bg-gradient-to-br from-cyan-600 via-blue-500 to-indigo-500",
+      "bg-linear-to-br from-orange-600 via-red-500 to-yellow-500",
+      "bg-linear-to-br from-purple-600 via-pink-500 to-orange-400",
+      "bg-linear-to-br from-blue-600 via-cyan-500 to-teal-400",
+      "bg-linear-to-br from-green-600 via-emerald-500 to-teal-400",
+      "bg-linear-to-br from-orange-500 via-amber-500 to-yellow-400",
+      "bg-linear-to-br from-indigo-600 via-purple-500 to-pink-500",
+      "bg-linear-to-br from-yellow-600 via-orange-500 to-red-500",
+      "bg-linear-to-br from-violet-600 via-purple-500 to-fuchsia-500",
+      "bg-linear-to-br from-emerald-600 via-green-500 to-lime-400",
+      "bg-linear-to-br from-cyan-600 via-blue-500 to-indigo-500",
     ];
 
     if (slideType === "intro") return gradients[0];
     if (slideType === "finale") return gradients[6];
-    if (slideType === "chart-portfolio") return gradients[4];
+    if (slideType === "chart-portfolio") return gradients[3];
     if (slideType === "chart-progress") return gradients[2];
 
     // For recommendations, cycle through remaining gradients
