@@ -222,7 +222,7 @@ export default function Init() {
               </div>
 
               <div>
-                <p className="font-medium mb-1">Jobtitle</p>
+                <p className="font-medium mb-1">Occupation</p>
                 <Input
                   name="jobTitle"
                   placeholder="Job Title"
@@ -241,14 +241,14 @@ export default function Init() {
 
               <div>
                 <p className="font-medium mb-1">
-                  Yearly Salary: €
+                  Yearly salary: €
                   {startState.occupation.yearlySalaryInEuro.toLocaleString(
                     "de-DE"
                   )}
                 </p>
                 <Slider
                   value={[startState.occupation.yearlySalaryInEuro]}
-                  min={10000}
+                  min={0}
                   max={300000}
                   step={1000}
                   onValueChange={(val) =>
