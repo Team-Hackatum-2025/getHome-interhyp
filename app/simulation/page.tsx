@@ -152,6 +152,8 @@ export default function Simulation() {
   );
   const [showEventDecision, setShowEventDecision] = useState(!!currentEvent);
   const [isAdvancing, setIsAdvancing] = useState(false);
+  const [showGameOver, setShowGameOver] = useState(false);
+  const [recommendations, setRecommendations] = useState("");
 
   const currentYear = state?.year || new Date().getFullYear();
 
@@ -159,7 +161,18 @@ export default function Simulation() {
     setIsAdvancing(true);
     const gameEvent = await gameEngine.runLoop();
     triggerUpdate();
-    setShowEventDecision(!!gameEvent);
+    
+    // Check if game is terminated after running the loop
+    const currentState = gameEngine.getState() as StateModel;
+    if ((currentState as any).terminated) {
+      // Generate recommendations
+      const feedback = await gameEngine.generateRecommendations();
+      setRecommendations(feedback);
+      setShowGameOver(true);
+    } else {
+      setShowEventDecision(!!gameEvent);
+    }
+    
     setIsAdvancing(false);
   };
 
@@ -562,6 +575,44 @@ export default function Simulation() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Game Over Dialog with Recommendations */}
+      <Dialog open={showGameOver} onOpenChange={() => router.push("/init")}>
+        <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-3xl font-bold text-green-600">
+              🎉 Congratulations! You've Reached Your Goal! 🎉
+            </DialogTitle>
+            <DialogDescription className="text-lg mt-2">
+              You have successfully accumulated enough wealth to achieve your housing dream!
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-6 space-y-4">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+              <h3 className="text-xl font-semibold text-green-800 mb-4">
+                Your Journey Summary
+              </h3>
+              <div className="prose prose-sm max-w-none text-gray-700">
+                {recommendations.split('\n').map((paragraph, idx) => (
+                  paragraph.trim() && (
+                    <p key={idx} className="mb-3">
+                      {paragraph}
+                    </p>
+                  )
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end mt-6">
+              <Button
+                onClick={() => router.push("/init")}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Start New Game
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 
