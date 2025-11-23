@@ -6,8 +6,9 @@ import {Slider} from "@/components/ui/slider";
 import {Label} from "@/components/ui/label";
 import {useState, useMemo} from "react";
 import {
-  LineChart,
   Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -31,8 +32,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {Home, MapPin, Users, Ruler, Briefcase, CreditCard} from "lucide-react";
+import {Home, MapPin, Ruler} from "lucide-react";
 import Character from "@/components/character";
+import Wrapup from "@/components/wrapup";
+
+const formatMoney = (value: number): string => {
+  if (value >= 1000000) {
+    return `${(value / 1000000).toFixed(1)}M`;
+  } else if (value >= 1000) {
+    return `${(value / 1000).toFixed(0)}k`;
+  }
+  return Math.round(value).toString();
+};
 
 export default function Simulation() {
   const router = useRouter();
@@ -173,7 +184,6 @@ export default function Simulation() {
   const [showEventDecision, setShowEventDecision] = useState(!!currentEvent);
   const [isAdvancing, setIsAdvancing] = useState(false);
   const [showGameOver, setShowGameOver] = useState(false);
-  const [recommendations, setRecommendations] = useState("");
 
   const currentYear = state?.year || new Date().getFullYear();
 
@@ -185,9 +195,6 @@ export default function Simulation() {
     // Check if game is terminated after running the loop
     const currentState = gameEngine.getState() as StateModel;
     if ((currentState as any).terminated) {
-      // Generate recommendations
-      const feedback = await gameEngine.generateRecommendations();
-      setRecommendations(feedback);
       setShowGameOver(true);
     } else {
       setShowEventDecision(!!gameEvent);
@@ -222,15 +229,22 @@ export default function Simulation() {
 
   // Chart data from real game history
   const chartData = useMemo(() => {
-    return history.map((s: StateModel) => ({
-      year: s.year,
-      wealth:
-        (s.portfolio?.cashInEuro ?? 0) +
-        (s.portfolio?.cryptoInEuro ?? 0) +
-        (s.portfolio?.etfInEuro ?? 0),
-      satisfaction: s.lifeSatisfactionFrom1To100,
-      goal: gameEngine.getGoals().buyingPrice,
-    }));
+    return history.map((s: StateModel) => {
+      // Find events that happened in this year
+      const eventsInYear = eventHistory.filter(e => e.year === s.year);
+      const emoji = eventsInYear.length > 0 ? eventsInYear[0].emoji : null;
+      
+      return {
+        year: s.year,
+        wealth:
+          (s.portfolio?.cashInEuro ?? 0) +
+          (s.portfolio?.cryptoInEuro ?? 0) +
+          (s.portfolio?.etfInEuro ?? 0),
+        satisfaction: s.lifeSatisfactionFrom1To100,
+        goal: gameEngine.getGoals().buyingPrice,
+        emoji,
+      };
+    });
   }, [gameEngine.getHistoryVersion(), gameEngine]);
 
   // Portfolio breakdown
@@ -350,12 +364,6 @@ export default function Simulation() {
               <Character state={state} />
               <div className="space-y-2 pt-2 border-t">
                 <div>
-                  <p className="text-xs text-gray-600">Current Age</p>
-                  <p className="text-sm font-semibold">
-                    {state?.age ?? 0} years
-                  </p>
-                </div>
-                <div>
                   <p className="text-xs text-gray-600">Current Year</p>
                   <p className="text-sm font-semibold">{currentYear}</p>
                 </div>
@@ -413,48 +421,8 @@ export default function Simulation() {
                   </p>
                 </div>
               )}
-
-              <div className="mt-3 flex items-center gap-3">
-                <div className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-700">
-                  <Users size={14} className="text-gray-600" />
-                  <span>
-                    {children} {children === 1 ? "child" : "children"}
-                  </span>
-                </div>
-
-                <div
-                  className={
-                    "px-2 py-1 rounded text-xs font-medium " +
-                    (married
-                      ? "bg-green-100 text-green-800"
-                      : "bg-gray-100 text-gray-700")
-                  }
-                >
-                  {married ? "Married" : "Single"}
-                </div>
-              </div>
-
               {/* Occupation */}
-              <div className="mt-4 pt-3 border-t">
-                <div className="flex items-center gap-2">
-                  <Briefcase size={14} className="text-gray-500" />
-                  <p className="text-xs text-gray-600">
-                    {state?.occupation?.occupationTitle || "Occupation"}
-                  </p>
-                </div>
-                {state?.occupation?.yearlySalaryInEuro !== undefined && (
-                  <div className="mt-1 flex items-center gap-2">
-                    <CreditCard size={14} className="text-gray-400" />
-                    <p className="text-xs text-gray-600">
-                      €
-                      {Math.round(
-                        state.occupation.yearlySalaryInEuro
-                      ).toLocaleString("de-DE")}{" "}
-                      / year
-                    </p>
-                  </div>
-                )}
-              </div>
+              <div className="mt-4 pt-3 border-t"></div>
             </div>
 
             <div>
@@ -523,16 +491,55 @@ export default function Simulation() {
           </h2>
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart
+              <AreaChart
                 data={chartData}
                 margin={{top: 5, right: 30, left: 0, bottom: 5}}
               >
+                <defs>
+                  <linearGradient id="colorWealth" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient
+                    id="colorSatisfaction"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="year" />
+                <XAxis 
+                  dataKey="year"
+                  tick={(props) => {
+                    const { x, y, payload } = props;
+                    const dataPoint = chartData.find(d => d.year === payload.value);
+                    return (
+                      <g transform={`translate(${x},${y})`}>
+                        <text x={0} y={0} dy={16} textAnchor="middle" fill="#666" fontSize={12}>
+                          {payload.value}
+                        </text>
+                        {dataPoint?.emoji && (
+                          <g>
+                            <circle cx={0} cy={-8} r={12} fill="white" stroke="#10b981" strokeWidth={2} />
+                            <text x={0} y={-8} textAnchor="middle" dominantBaseline="central" fontSize={14}>
+                              {dataPoint.emoji}
+                            </text>
+                          </g>
+                        )}
+                      </g>
+                    );
+                  }}
+                  height={60}
+                />
                 <YAxis
                   yAxisId="left"
+                  tickFormatter={(value) => `€${formatMoney(value)}`}
                   label={{
-                    value: "Wealth (€)",
+                    value: "Wealth",
                     angle: -90,
                     position: "insideLeft",
                   }}
@@ -542,7 +549,7 @@ export default function Simulation() {
                   orientation="right"
                   domain={[0, 100]}
                   label={{
-                    value: "Satisfaction (0-100)",
+                    value: "Satisfaction",
                     angle: 90,
                     position: "insideRight",
                   }}
@@ -557,22 +564,24 @@ export default function Simulation() {
                   }}
                 />
                 <Legend />
-                <Line
+                <Area
                   yAxisId="left"
                   type="monotone"
                   dataKey="wealth"
                   stroke="#10b981"
+                  fillOpacity={1}
+                  fill="url(#colorWealth)"
                   name="Wealth"
-                  dot={false}
                   strokeWidth={2}
                 />
-                <Line
+                <Area
                   yAxisId="right"
                   type="monotone"
                   dataKey="satisfaction"
                   stroke="#f59e0b"
+                  fillOpacity={1}
+                  fill="url(#colorSatisfaction)"
                   name="Satisfaction"
-                  dot={false}
                   strokeWidth={2}
                 />
                 <Line
@@ -597,7 +606,7 @@ export default function Simulation() {
                     fontWeight: "bold",
                   }}
                 />
-              </LineChart>
+              </AreaChart>
             </ResponsiveContainer>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-gray-500">
@@ -663,45 +672,12 @@ export default function Simulation() {
           </DialogContent>
         </Dialog>
 
-        {/* Game Over Dialog with Recommendations */}
-        <Dialog open={showGameOver} onOpenChange={() => router.push("/init")}>
-          <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-3xl font-bold text-green-600">
-                🎉 Congratulations! You've Reached Your Goal! 🎉
-              </DialogTitle>
-              <DialogDescription className="text-lg mt-2">
-                You have successfully accumulated enough wealth to achieve your
-                housing dream!
-              </DialogDescription>
-            </DialogHeader>
-            <div className="mt-6 space-y-4">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                <h3 className="text-xl font-semibold text-green-800 mb-4">
-                  Your Journey Summary
-                </h3>
-                <div className="prose prose-sm max-w-none text-gray-700">
-                  {recommendations.split("\n").map(
-                    (paragraph, idx) =>
-                      paragraph.trim() && (
-                        <p key={idx} className="mb-3">
-                          {paragraph}
-                        </p>
-                      )
-                  )}
-                </div>
-              </div>
-              <div className="flex justify-end mt-6">
-                <Button
-                  onClick={() => router.push("/init")}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  Start New Game
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+        {/* Game Over - Show Wrapup Component */}
+        {showGameOver && (
+          <div className="fixed inset-0 z-50">
+            <Wrapup />
+          </div>
+        )}
 
         {/* Right Sidebar: Events & Portfolio */}
         <Card className="col-span-1 p-4 flex flex-col gap-4">
