@@ -428,7 +428,7 @@ export default function Simulation() {
               </DialogHeader>
               <div className="grid grid-cols-2 gap-4">
                 <Button onClick={() => router.push("/simulation/find-homes")}>
-                  Move
+                  Change Accommodation
                 </Button>
                 <Button
                   onClick={() => router.push("/simulation/find-occupation")}
@@ -631,7 +631,7 @@ export default function Simulation() {
         {/* Recent Events */}
         <div>
           <h3 className="font-bold text-sm mb-3">Recent Events</h3>
-          <div className="space-y-2 max-h-48 overflow-y-auto">
+          <div className="space-y-2 max-h-60 min-h-60 overflow-y-auto">
             {eventHistory.length > 0 ? (
               eventHistory
                 .slice(-5)
