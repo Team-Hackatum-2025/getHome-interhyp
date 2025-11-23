@@ -8,6 +8,8 @@ import {useState, useMemo} from "react";
 import {
   LineChart,
   Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -33,6 +35,15 @@ import {
 } from "@/components/ui/dialog";
 import {Home, MapPin, Users, Ruler, Briefcase, CreditCard} from "lucide-react";
 import Character from "@/components/character";
+
+const formatMoney = (value: number): string => {
+  if (value >= 1000000) {
+    return `${(value / 1000000).toFixed(1)}M`;
+  } else if (value >= 1000) {
+    return `${(value / 1000).toFixed(0)}k`;
+  }
+  return Math.round(value).toString();
+};
 
 export default function Simulation() {
   const router = useRouter();
@@ -477,16 +488,27 @@ export default function Simulation() {
           </h2>
           {chartData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart
+              <AreaChart
                 data={chartData}
                 margin={{top: 5, right: 30, left: 0, bottom: 5}}
               >
+                <defs>
+                  <linearGradient id="colorWealth" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorSatisfaction" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.4}/>
+                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="year" />
                 <YAxis
                   yAxisId="left"
+                  tickFormatter={(value) => `€${formatMoney(value)}`}
                   label={{
-                    value: "Wealth (€)",
+                    value: "Wealth",
                     angle: -90,
                     position: "insideLeft",
                   }}
@@ -496,7 +518,7 @@ export default function Simulation() {
                   orientation="right"
                   domain={[0, 100]}
                   label={{
-                    value: "Satisfaction (0-100)",
+                    value: "Satisfaction",
                     angle: 90,
                     position: "insideRight",
                   }}
@@ -511,22 +533,24 @@ export default function Simulation() {
                   }}
                 />
                 <Legend />
-                <Line
+                <Area
                   yAxisId="left"
                   type="monotone"
                   dataKey="wealth"
                   stroke="#10b981"
+                  fillOpacity={1}
+                  fill="url(#colorWealth)"
                   name="Wealth"
-                  dot={false}
                   strokeWidth={2}
                 />
-                <Line
+                <Area
                   yAxisId="right"
                   type="monotone"
                   dataKey="satisfaction"
                   stroke="#f59e0b"
+                  fillOpacity={1}
+                  fill="url(#colorSatisfaction)"
                   name="Satisfaction"
-                  dot={false}
                   strokeWidth={2}
                 />
                 <Line
@@ -551,7 +575,7 @@ export default function Simulation() {
                     fontWeight: "bold",
                   }}
                 />
-              </LineChart>
+              </AreaChart>
             </ResponsiveContainer>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-gray-500">
