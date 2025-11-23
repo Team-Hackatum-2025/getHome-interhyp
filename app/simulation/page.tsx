@@ -4,7 +4,7 @@ import {Button} from "@/components/ui/button";
 import {Card} from "@/components/ui/card";
 import {Slider} from "@/components/ui/slider";
 import {Label} from "@/components/ui/label";
-import {useState, useMemo} from "react";
+import {useState, useMemo, useEffect, useRef} from "react";
 import {
   Line,
   AreaChart,
@@ -184,12 +184,34 @@ export default function Simulation() {
   const [isAdvancing, setIsAdvancing] = useState(false);
   const [showGameOver, setShowGameOver] = useState(false);
   const [recommendations, setRecommendations] = useState<string[]>([]);
+  const [showCreditAnimation, setShowCreditAnimation] = useState(false);
+  const [showActionsDialog, setShowActionsDialog] = useState(false);
+  const [showLoanAnimation, setShowLoanAnimation] = useState(false);
+  const previousCreditWorthiness = useRef(state?.creditWorthiness || false);
 
   const currentYear = state?.year || new Date().getFullYear();
+
+  // Watch for creditworthiness changes
+  useEffect(() => {
+    if (state?.creditWorthiness && !previousCreditWorthiness.current) {
+      setShowCreditAnimation(true);
+      setTimeout(() => setShowCreditAnimation(false), 1000);
+    }
+    previousCreditWorthiness.current = state?.creditWorthiness || false;
+  }, [state?.creditWorthiness]);
+
+  // Trigger loan animation when actions dialog opens and user is creditworthy
+  useEffect(() => {
+    if (showActionsDialog && state?.creditWorthiness) {
+      setShowLoanAnimation(true);
+      setTimeout(() => setShowLoanAnimation(false), 1000);
+    }
+  }, [showActionsDialog, state?.creditWorthiness]);
 
   const handleAdvanceYear = async () => {
     setIsAdvancing(true);
     const gameEvent = await gameEngine.runLoop();
+    console.log(gameEngine.getState())
     triggerUpdate();
 
     // Check if game is terminated after running the loop
@@ -453,10 +475,24 @@ export default function Simulation() {
             >
               {isAdvancing ? "Processing..." : "Next Year"}
             </Button>
-            <Dialog>
+            <Dialog open={showActionsDialog} onOpenChange={setShowActionsDialog}>
               <DialogTrigger asChild>
-                <Button className="w-full mb-6 bg-black text-white">
-                  Actions
+                <Button 
+                  className={`w-full mb-6 text-white transition-all duration-300 relative overflow-hidden ${
+                    state?.creditWorthiness
+                      ? 'bg-gradient-to-r from-orange-500 to-orange-600 shadow-lg shadow-orange-500/50' 
+                      : 'bg-black hover:bg-gray-800'
+                  }`}
+                >
+                  {state?.creditWorthiness && showCreditAnimation && (
+                    <span 
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                      style={{
+                        animation: 'shimmer 1s ease-in-out'
+                      }}
+                    />
+                  )}
+                  <span className="relative z-10">Actions</span>
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -480,7 +516,25 @@ export default function Simulation() {
                   >
                     Manage Portfolio
                   </Button>
-                  <Button onClick={() => null}>Take a Loan</Button>
+                  <Button 
+                    onClick={() => null}
+                    disabled={!state?.creditWorthiness}
+                    className={`relative overflow-hidden transition-all duration-300 ${
+                      state?.creditWorthiness
+                        ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/50 hover:from-orange-600 hover:to-orange-700'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                  >
+                    {state?.creditWorthiness && showLoanAnimation && (
+                      <span 
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
+                        style={{
+                          animation: 'shimmer 1s ease-in-out'
+                        }}
+                      />
+                    )}
+                    <span className="relative z-10">Take a Loan</span>
+                  </Button>
                 </div>
               </DialogContent>
             </Dialog>
@@ -489,7 +543,7 @@ export default function Simulation() {
 
         {/* Center: Charts */}
         <Card className="col-span-2 p-6 flex flex-col">
-          <h2 className="text-xl font-bold mb-4">
+          <h2 className="text-xl font-bold">
             Wealth & Satisfaction Progress
           </h2>
           {chartData.length > 0 ? (
