@@ -53,10 +53,10 @@ export default function Simulation() {
       if (occupationTitle) details.push(`Job: ${occupationTitle}`);
       if (occupationDescription) details.push(`Job description: ${occupationDescription}`);
       if (yearlySalaryInEuro !== undefined && yearlySalaryInEuro !== null) {
-        details.push(`Gehalt: ${Math.round(yearlySalaryInEuro).toLocaleString("de-DE")} €/Jahr`);
+        details.push(`Salary: ${Math.round(yearlySalaryInEuro).toLocaleString("de-DE")} €/Year`);
       }
       if (stressLevelFrom0To100 !== undefined && stressLevelFrom0To100 !== null) {
-        details.push(`Stresslevel: ${stressLevelFrom0To100}/100`);
+        details.push(`Stress level: ${stressLevelFrom0To100}/100`);
       }
     }
 
@@ -151,17 +151,27 @@ export default function Simulation() {
     state?.savingsRateInPercent || 0
   );
   const [showEventDecision, setShowEventDecision] = useState(!!currentEvent);
+  const [isAdvancing, setIsAdvancing] = useState(false);
 
   const currentYear = state?.year || new Date().getFullYear();
 
   const handleAdvanceYear = async () => {
+    setIsAdvancing(true);
     const gameEvent = await gameEngine.runLoop();
     triggerUpdate();
     setShowEventDecision(!!gameEvent);
+    setIsAdvancing(false);
   };
 
   const handleSavingsRateChange = (value: number[]) => {
     setSavingsRate(value[0]);
+    gameEngine.decideActions({
+      newOccupationModel: null,
+      newPortfolioModel: null,
+      newLivingModel: null,
+      newSavingsRateInPercent: value[0]
+    });
+    triggerUpdate();
   };
 
   const handleEventDecision = (accept: boolean) => {
@@ -188,7 +198,7 @@ export default function Simulation() {
       satisfaction: s.lifeSatisfactionFrom1To100,
       goal: gameEngine.getGoals().buyingPrice,
     }));
-  }, [history, gameEngine]);
+  }, [history.length, state.year, gameEngine]);
 
   // Portfolio breakdown
   const portfolioBreakdown = useMemo(() => {
@@ -386,9 +396,9 @@ export default function Simulation() {
           <Button
             onClick={handleAdvanceYear}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold"
-            disabled={history.length === 0}
+            disabled={history.length === 0 || isAdvancing}
           >
-            Next Year
+            {isAdvancing ? "Processing..." : "Next Year"}
           </Button>
           <Dialog>
             <DialogTrigger asChild>
@@ -597,14 +607,6 @@ export default function Simulation() {
                       const change = impact.newPortfolioModel.etfInEuro;
                       changes.push(
                         `ETF ${change >= 0 ? "+" : ""}${Math.round(change).toLocaleString("de-DE")}€`
-                      );
-                    }
-
-                    // Satisfaction change
-                    if (impact.changeInLifeSatisfactionFrom1To100) {
-                      const change = impact.changeInLifeSatisfactionFrom1To100;
-                      changes.push(
-                        `Satisfaction ${change >= 0 ? "+" : ""}${change}`
                       );
                     }
 

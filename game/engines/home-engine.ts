@@ -10,9 +10,11 @@ export class HomeEngine implements HomeEngineInterface {
     private genAI: GoogleGenerativeAI;
 
     constructor() {
-        const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
+        const apiKey = process.env.GOOGLE_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
         if (!apiKey) {
-            throw new Error("API Key is missing! Please provide it in .env.local");
+            console.warn("Warning: API Key missing in HomeEngine.");
+            this.genAI = null as any;
+            return;
         }
         this.genAI = new GoogleGenerativeAI(apiKey);
     }
