@@ -94,6 +94,7 @@ export default function Init() {
 
     setGoal((prev) => ({
       ...prev,
+      title: found.title,
       buyingPrice: found.buyingPrice ?? prev.buyingPrice,
       rooms: found.rooms ?? prev.rooms,
       squareMeter: found.squareMeter ?? prev.squareMeter,
@@ -126,6 +127,7 @@ export default function Init() {
           // Use mock listings as fallback - transform mock data to match ListingModel
           type MockListingRaw = {
             id: string | number;
+            title: string;
             buyingPrice: string | number;
             zip: string | number;
             rooms: string | number;
@@ -137,6 +139,7 @@ export default function Init() {
               .slice(0, 10)
               .map((listing) => ({
                 id: String(listing.id),
+                title: String(listing.title),
                 buyingPrice: Number(listing.buyingPrice),
                 zip: String(listing.zip),
                 rooms: Number(listing.rooms),
@@ -361,7 +364,7 @@ export default function Init() {
                 <Slider
                   value={[startState.portfolio.cashInEuro]}
                   min={0}
-                  max={500000}
+                  max={133700}
                   step={1000}
                   onValueChange={(val) =>
                     setStartState({
@@ -382,7 +385,7 @@ export default function Init() {
                 <Slider
                   value={[startState.living.yearlyRentInEuro]}
                   min={1200}
-                  max={120000}
+                  max={48000}
                   step={120}
                   onValueChange={(val) =>
                     setStartState({
