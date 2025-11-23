@@ -20,5 +20,4 @@ The simulation accurately models key dynamics:
 ## 3. Technical Documentation
 
 For a detailed overview of the governing equations for Life Satisfaction (Tanh Curve), Stochastic Asset Growth (Box-Muller/Normal Distribution), and Household Budgeting:
-
-[Mathematical Modeling of the getHome Framework](./doc/Mathematical Modeling of the getHome Framework.pdf)
+[PDF-Anleitung](./doc/Mathematical-Modeling-of-the-getHome-Framework.pdf)
