@@ -165,6 +165,13 @@ export default function Simulation() {
 
   const handleSavingsRateChange = (value: number[]) => {
     setSavingsRate(value[0]);
+    gameEngine.decideActions({
+      newOccupationModel: null,
+      newPortfolioModel: null,
+      newLivingModel: null,
+      newSavingsRateInPercent: value[0]
+    });
+    triggerUpdate();
   };
 
   const handleEventDecision = (accept: boolean) => {
@@ -184,7 +191,7 @@ export default function Simulation() {
       satisfaction: s.lifeSatisfactionFrom1To100,
       goal: gameEngine.getGoals().buyingPrice,
     }));
-  }, [history, gameEngine]);
+  }, [history.length, state.year, gameEngine]);
 
   // Portfolio breakdown
   const portfolioBreakdown = useMemo(() => {
