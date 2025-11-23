@@ -28,10 +28,10 @@ export class JobEngine implements JobEngineInterface {
                 1. Estimate the annual salary in EUR (yearlySalaryInEuro).
                 2. Estimate the stress level on a scale of 1-100 (stressLevelFrom0To100).
                 3. Provide a short description/explanation (occupationDescription) - max 1 sentence explaining the rating.
-
+                4. Provide a title for the job (jobTitle)
                 Constraints:
                 - Return ONLY integer numbers for salary and stress.
-                - Respond ONLY with a JSON object matching the target fields.
+                - Respond ONLY with a JSON object (NOT array) matching the target fields.
             `,
             generationConfig: { responseMimeType: "application/json" }
         });
@@ -43,9 +43,9 @@ export class JobEngine implements JobEngineInterface {
             const response = result.response;
             const text = response.text();
             const data = JSON.parse(text);
-
+            console.log(data);
             return {
-                occupationTitle: job_description, 
+                occupationTitle: data.jobTitle, 
                 occupationDescription: data.occupationDescription || "No description available.",
                 yearlySalaryInEuro: Math.round(Number(data.yearlySalaryInEuro) || 0),
                 stressLevelFrom0To100: Math.round(Number(data.stressLevelFrom0To100) || 0)
